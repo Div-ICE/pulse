@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import requests
 
 
@@ -18,7 +19,17 @@ def api_answer(id):
         mirror += 1
         if mirror == len(api_addr):
             mirror = 0
-    response = requests.get(api_addr[mirror]+'/posts/'+str(id))
+    url = api_addr[mirror]+'/posts/'+str(id)
+    try:
+        response = requests.get(url)
+    except requests.RequestException as exeption:
+        raise ConnectionError(f'Error: {exeption}')
+    if response.status_code != HTTPStatus.OK:
+        chek_message = (
+            f'URL {url} is not availible',
+            f'HTTP status: {response.status_code}'
+        )
+        raise Exception(chek_message)
     userid = response.json()['userId']
     id = response.json()['id']
     title = response.json()['title']
@@ -27,4 +38,4 @@ def api_answer(id):
 
 
 if __name__ == "__main__":
-    print(api_answer(1))
+    print(api_answer(1000))
